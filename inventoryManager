@@ -1,0 +1,645 @@
+import java.io.*;
+import java.util.*;
+public class inventoryManager
+{
+    InputStreamReader read = new InputStreamReader(System.in);
+    BufferedReader in = new BufferedReader(read);
+    String[] code = new String[100]; //item codes
+    String[] n = new String[100];    //name of items
+    int[] q = new int[100];          //quantity of items
+    double[] p = new double[100];    //price of items
+    int c;
+    static void main() throws InterruptedException,IOException
+    {
+        inventoryManager obj = new inventoryManager();
+        obj.input();
+        obj.cmd();
+    }
+    void input() throws IOException
+    {
+        System.out.println("Enter number of varieties of items, maximum "+n.length);
+        c = Integer.parseInt(in.readLine());
+        if (c > n.length)
+        {
+            System.out.println("Sorry, beyond capacity");
+            System.exit(0);
+        }
+        for (int i = 0; i < c; i++)
+        {
+            System.out.println("Enter item code of item "+(i+1));
+            code[i] = in.readLine();
+            System.out.println("Enter name of item "+(i+1));
+            n[i] = in.readLine();
+            System.out.println("Enter quantity of item "+(i+1));
+            q[i] = Integer.parseInt(in.readLine());
+            System.out.println("Enter price per unit item "+(i+1));
+            p[i] = Double.parseDouble(in.readLine());
+        }
+    }
+    void cmd() throws IOException,InterruptedException
+    {
+        Thread.sleep(2000);
+        clearScreen();
+        System.out.println("*********Commands**********");
+        System.out.println("If you want to add another item to the list, enter '/*add'");
+        System.out.println("If you want to remove an item from the list, enter '/*remove'");
+        System.out.println("If you want to change a certain value, enter '/*change'");
+        System.out.println("If you want to search for a certain item, enter '/*search'");
+        System.out.println("If you want to sort the table, enter '/*sort'");
+        System.out.println("If you want to find total value of the store, enter '/*value'");
+        System.out.println("If you want to exit the program, enter '/*exit'");
+        Thread.sleep(2000);
+        clearScreen();
+        display();
+        System.out.println();
+        update();
+    }
+    void display()
+    {
+        Calendar na = Calendar.getInstance();
+        System.out.printf("%-4s"+"%-25s"+"%-25s"+"%-25s"+"%-25s%n", "", "Item code", "Item Name", "Quantity", "Price per unit");             //formatting so they are along same column
+        for (int i = 0; i < c; i++)                                                                                                  
+        {                                                                                                                                    
+            System.out.printf("%-4d"+"%-25s"+"%-25s"+"%,-25d"+"%,-25.2f%n", (i+1), code[i], n[i], q[i], p[i]);                                     
+        }
+        System.out.format("%tB %te, %tY; "+"%tl:%tM %tp%n", na, na, na, na, na, na);
+    }
+    void clearScreen() throws InterruptedException,IOException 
+    {
+        Thread.sleep(1000);
+        new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();               //erases console
+        System.out.flush();
+    }
+    void update() throws InterruptedException,IOException                       //every action redirects here, so that these commands can be executed
+    {
+        String upd = in.readLine();
+        if ((upd.trim()).equalsIgnoreCase("/*exit"))
+        {
+            System.out.println("Are you sure? Enter 'yes' to confirm");
+            String cnf = in.readLine();
+            if (cnf.trim().equalsIgnoreCase("yes"))
+            {
+                Thread.sleep(2000);
+                System.out.println("Inventory closed");
+                System.exit(0);
+            }
+            else
+            {
+                System.out.println("refreshing");
+                Thread.sleep(2000);
+                clearScreen();
+                display();
+                update();
+            }
+                
+        }
+        else if ((upd.trim().equalsIgnoreCase("/*add")))
+            addValue();
+        else if ((upd.trim().equalsIgnoreCase("/*remove")))
+            removeValue();
+        else if ((upd.trim().equalsIgnoreCase("/*change")))
+            changeValue();
+        else if ((upd.trim().equalsIgnoreCase("/*search")))
+            search();
+        else if ((upd.trim().equalsIgnoreCase("/*sort")))
+            sort();
+        else if ((upd.trim().equalsIgnoreCase("/*value")))
+            findValue();
+        else
+        {
+            System.out.print("Sorry, I'm not sure what "+upd+" is meant to imply");
+            Thread.sleep(2000);
+            clearScreen();
+            display();
+        }
+        update();           //so that after execution of one operation, it can allow user to perform one more
+    }
+    void addValue() throws InterruptedException,IOException
+    {
+        System.out.println("Enter how many items you want to add");
+        int t = Integer.parseInt(in.readLine());
+        c+=t;
+        if (c > n.length)
+        {
+            System.out.println("Sorry, size too big!");
+            c-=t;
+            Thread.sleep(2000);
+            clearScreen();
+            display();
+            update();
+        }
+        for (int i = c-t; i < c; i++)
+        {
+            System.out.println("Enter item code of item");
+            code[i] = in.readLine();
+            System.out.println("Enter name of item");
+            n[i] = in.readLine();
+            System.out.println("Enter quantity of the item");
+            q[i] = Integer.parseInt(in.readLine());
+            System.out.println("Enter price of the item");
+            p[i] = Double.parseDouble(in.readLine());
+        }
+        System.out.println("Returning to table...");
+        cmd();
+    }
+    void removeValue() throws InterruptedException,IOException
+    {
+        System.out.println("Enter the numerical position of the item in the table you would like to remove");
+        int pos = Integer.parseInt(in.readLine());
+        if (pos > c)
+        {
+            System.out.println("That element is not present yet!");
+            Thread.sleep(2000);
+            clearScreen();
+            display();
+            update();
+        }
+        System.out.println("Removing:\nItem Code: "+code[pos-1]+"\nItem: "+n[pos-1]+"\nQuantity: "+q[pos-1]+"\nPrice: "+p[pos-1]);
+        System.out.println("Enter 'yes' to confirm");
+        String cnf = in.readLine();
+        if (cnf.trim().equalsIgnoreCase("Yes"))
+        {
+            for (int j = pos-1; j < c; j++)
+            {
+                code[j] = code[j+1];
+                n[j] = n[j+1];
+                q[j] = q[j+1];
+                p[j] = p[j+1];
+            }
+            c--;
+        }
+        System.out.println("Returning to table...");
+        cmd();
+    }
+    void changeValue() throws InterruptedException,IOException
+    {
+        System.out.println("Would you like to change only a specific value (Enter 'a') or would you like to replace an entire row (Enter 'b')");
+        char ch = in.readLine().charAt(0);
+        switch (ch)
+        {
+            case 'a':
+                {
+                    System.out.println("Enter which column from which the value is to be changed from");
+                    System.out.println("Enter 'a' for item code, 'b' for item name, 'c' from quantity and 'd' from price");
+                    char ch2 = in.readLine().charAt(0);
+                    switch (ch2)
+                    {
+                        case 'a':
+                            {
+                                System.out.println("Enter the position of the item code you want to change");
+                                int pos = Integer.parseInt(in.readLine());
+                                if (pos > c)
+                                {
+                                    System.out.println("That value does not exist!");
+                                    clearScreen();
+                                    display();
+                                    update();
+                                }
+                                System.out.println("Enter the item code to replace the item code "+code[pos-1]);
+                                code[pos-1] = in.readLine();
+                                System.out.println("working on it...");
+                                cmd();
+                            }
+                            break;
+                        case 'b':
+                            {
+                                System.out.println("Enter the position of the item code you want to change");
+                                int pos = Integer.parseInt(in.readLine());
+                                if (pos > c)
+                                {
+                                    System.out.println("That value does not exist!");
+                                    clearScreen();
+                                    display();
+                                    update();
+                                }
+                                System.out.println("Enter the item code to replace the item name "+n[pos-1]);
+                                n[pos-1] = in.readLine();
+                                System.out.println("working on it...");
+                                cmd();
+                            }
+                            break;
+                        case 'c':
+                            {
+                                System.out.println("Enter the position of the item code you want to change");
+                                int pos = Integer.parseInt(in.readLine());
+                                if (pos > c)
+                                {
+                                    System.out.println("That value does not exist!");
+                                    clearScreen();
+                                    display();
+                                    update();
+                                }
+                                System.out.println("Enter the item code to replace the item code "+q[pos-1]);
+                                q[pos-1] = Integer.parseInt(in.readLine());
+                                System.out.println("working on it...");
+                                cmd();
+                            }
+                            break;
+                        case 'd':
+                            {
+                                System.out.println("Enter the position of the item code you want to change");
+                                int pos = Integer.parseInt(in.readLine());
+                                if (pos > c)
+                                {
+                                    System.out.println("That value does not exist!");
+                                    clearScreen();
+                                    display();
+                                    update();
+                                }
+                                System.out.println("Enter the item code to replace the item code "+p[pos-1]);
+                                p[pos-1] = Double.parseDouble(in.readLine());
+                                System.out.println("working on it...");
+                                cmd();
+                            }
+                            break;
+                        default:
+                            System.out.println("Invalid input, returning to table");
+                            cmd();
+                    }
+                }
+                break;
+            case 'b':
+                {
+                    System.out.println("Enter the numerical position of row in the table you would like to replace");
+                    int pos = Integer.parseInt(in.readLine());
+                    if (pos-1 > c)
+                    {
+                        System.out.println("That element does not exist yet!");
+            
+                        clearScreen();
+                        display();
+                        update();
+                    }
+                    System.out.println("Replacing:\nItem Code: "+code[pos-1]+"\nItem: "+n[pos-1]+"\nQuantity: "+q[pos-1]+"\nPrice: "+p[pos-1]);
+                    System.out.println("Enter 'yes' to confirm");
+                    String cnf = in.readLine();
+                    if (cnf.trim().equalsIgnoreCase("yes"))
+                    {
+                        System.out.println("Enter new item code");
+                        String cr = in.readLine();
+                        System.out.println("Enter name to replace");
+                        String nr = in.readLine();
+                        System.out.println("Enter new quantity");
+                        int qr = Integer.parseInt(in.readLine());
+                        System.out.println("Enter new price");
+                        double pr = Double.parseDouble(in.readLine());
+                        code[pos-1] = cr;
+                        n[pos-1] = nr;
+                        q[pos-1] = qr;
+                        p[pos-1] = pr;
+                    }
+                    System.out.println("Returning to table");
+                    cmd();
+                }
+            
+        }
+    }
+    void search() throws InterruptedException,IOException
+    {
+        System.out.println("Would you like to search by item code or by item name?");
+        System.out.println("Enter 'a' for searching by item code, 'b' for by item name");
+        char ch = in.readLine().charAt(0);
+        if (Character.isUpperCase(ch) == true)
+            ch = Character.toLowerCase(ch);
+        switch (ch)
+        {
+            case 'a':
+                {
+                    System.out.println("Enter the item code which is to be searched for");
+                    String shc = in.readLine();
+                    boolean fl = false;
+                    for (int i = 0; i < c; i++)
+                    {
+                        if (shc.trim().equalsIgnoreCase(code[i]) == true)
+                        {
+                            System.out.println("Item "+n[i]+" having item code "+code[i]+" can be found at position "+(i+1)+" on the table");
+                            fl = true;
+                            break;   
+                        }
+                    }
+                    if (fl == false)
+                        System.out.println("Item code not found...");
+                    Thread.sleep(4000);
+                    clearScreen();
+                    display();
+                    update();
+                }
+                break;
+            case 'b':
+                {
+                    System.out.println("Enter item to be searched for ");
+                    String shc = in.readLine();
+                    boolean fl = false;
+                    for (int i = 0; i < c; i++)
+                    {
+                        if (shc.trim().equalsIgnoreCase(n[i]) == true)
+                        {
+                            System.out.println("Item "+n[i]+" having item code "+code[i]+" can be found at position "+(i+1)+" on the table");
+                            fl = true;
+                            break;
+                        }
+                    }
+                    if (fl == false)
+                            System.out.println("Item not found...");
+                    Thread.sleep(4000);
+                    clearScreen();
+                    display();
+                    update();
+                }
+                break;
+            default: System.out.println("Invalid input, rerouting back to table");
+            Thread.sleep(2000);
+            cmd();
+        }
+    }
+    void sort() throws InterruptedException,IOException
+    {
+        System.out.println("Enter how you would like the table to be sorted");
+        System.out.println("Enter 'a' for sorting by item code");
+        System.out.println("Enter 'b' for sorting by item name");
+        System.out.println("Enter 'c' for sorting by quantity");
+        System.out.println("Enter 'd' for sorting by price per unit");
+        char chc = in.readLine().charAt(0);
+        if (Character.isUpperCase(chc) == true)
+            chc = Character.toLowerCase(chc);
+        switch (chc)
+        {
+            case 'a':
+                {
+                    System.out.println("Enter whether the sort should be ascending (Enter 'a') or descending (Enter 'd')");
+                    char ch2 = in.readLine().charAt(0);
+                    if (Character.isUpperCase(ch2) == true)
+                        ch2 = Character.toLowerCase(ch2);
+                    if (ch2 == 'a')
+                    {
+                        for (int i = 0; i < c-1; i++)
+                        {
+                            for (int j = i+1; j < c; j++)
+                            {
+                                if (code[i].compareToIgnoreCase(code[j]) > 0)
+                                {
+                                    String t = code[i];
+                                    code[i] = code[j];
+                                    code[j] = t;
+                                    String t2 = n[i];
+                                    n[i] = n[j];
+                                    n[j] = t2;
+                                    int tq = q[i];
+                                    q[i] = q[j];
+                                    q[j] = tq;
+                                    double tp = p[i];
+                                    p[i] = p[j];
+                                    p[j] = tp;
+                                }
+                            }
+                        }
+                    }
+                    else if (ch2 == 'd')
+                    {
+                        for (int i = 0; i < c-1; i++)
+                        {
+                            for (int j = i+1; j < c; j++)
+                            {
+                                if (code[i].compareToIgnoreCase(code[j]) < 0)
+                                {
+                                    String t = code[i];
+                                    code[i] = code[j];
+                                    code[j] = t;
+                                    String t2 = n[i];
+                                    n[i] = n[j];
+                                    n[j] = t2;
+                                    int tq = q[i];
+                                    q[i] = q[j];
+                                    q[j] = tq;
+                                    double tp = p[i];
+                                    p[i] = p[j];
+                                    p[j] = tp;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                         System.out.println("Invalid input, rerouting to table");
+                         cmd();
+                    }
+                    Thread.sleep(2000);
+                    clearScreen();
+                    display();
+                    update();
+                }
+                break;
+            case 'b':
+                {
+                    System.out.println("Enter whether the sort should be ascending (Enter 'a') or descending (Enter 'd')");
+                    char ch2 = in.readLine().charAt(0);
+                    if (Character.isUpperCase(ch2) == true)
+                        ch2 = Character.toLowerCase(ch2);
+                    if (ch2 == 'a')
+                    {
+                        for (int i = 0; i < c-1; i++)
+                        {
+                            for (int j = i+1; j < c; j++)
+                            {
+                                if (n[i].compareToIgnoreCase(n[j]) > 0)
+                                {
+                                    String t = code[i];
+                                    code[i] = code[j];
+                                    code[j] = t;
+                                    String t2 = n[i];
+                                    n[i] = n[j];
+                                    n[j] = t2;
+                                    int tq = q[i];
+                                    q[i] = q[j];
+                                    q[j] = tq;
+                                    double tp = p[i];
+                                    p[i] = p[j];
+                                    p[j] = tp;
+                                }
+                            }
+                        }
+                    }
+                    else if (ch2 == 'd')
+                    {
+                        for (int i = 0; i < c-1; i++)
+                        {
+                            for (int j = i+1; j < c; j++)
+                            {
+                                if (n[i].compareToIgnoreCase(n[j]) < 0)
+                                {
+                                    String t = code[i];
+                                    code[i] = code[j];
+                                    code[j] = t;
+                                    String t2 = n[i];
+                                    n[i] = n[j];
+                                    n[j] = t2;
+                                    int tq = q[i];
+                                    q[i] = q[j];
+                                    q[j] = tq;
+                                    double tp = p[i];
+                                    p[i] = p[j];
+                                    p[j] = tp;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                         System.out.println("Invalid input, rerouting to table");
+                         cmd();
+                    }
+                    Thread.sleep(2000);
+                    clearScreen();
+                    display();
+                    update();
+                }
+                break;
+            case 'c':
+                {
+                    System.out.println("Enter whether the sort should be ascending (Enter 'a') or descending (Enter 'd')");
+                    char ch2 = in.readLine().charAt(0);
+                    if (Character.isUpperCase(ch2) == true)
+                        ch2 = Character.toLowerCase(ch2);
+                    if (ch2 == 'a')
+                    {
+                        for (int i = 0; i < c-1; i++)
+                        {
+                            for (int j = i+1; j < c; j++)
+                            {
+                                if (q[i] > q[j])
+                                {
+                                    String t = code[i];
+                                    code[i] = code[j];
+                                    code[j] = t;
+                                    String t2 = n[i];
+                                    n[i] = n[j];
+                                    n[j] = t2;
+                                    int tq = q[i];
+                                    q[i] = q[j];
+                                    q[j] = tq;
+                                    double tp = p[i];
+                                    p[i] = p[j];
+                                    p[j] = tp;
+                                }
+                            }
+                        }
+                    }
+                    else if (ch2 == 'd')
+                    {
+                        for (int i = 0; i < c-1; i++)
+                        {
+                            for (int j = i+1; j < c; j++)
+                            {
+                                if (q[i] < q[j])
+                                {
+                                    String t = code[i];
+                                    code[i] = code[j];
+                                    code[j] = t;
+                                    String t2 = n[i];
+                                    n[i] = n[j];
+                                    n[j] = t2;
+                                    int tq = q[i];
+                                    q[i] = q[j];
+                                    q[j] = tq;
+                                    double tp = p[i];
+                                    p[i] = p[j];
+                                    p[j] = tp;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                         System.out.println("Invalid input, rerouting to table");
+                         cmd();
+                    }
+                    Thread.sleep(2000);
+                    clearScreen();
+                    display();
+                    update();
+                }
+                break;
+            case 'd':
+                {
+                    System.out.println("Enter whether the sort should be ascending (Enter 'a') or descending (Enter 'd')");
+                    char ch2 = in.readLine().charAt(0);
+                    if (Character.isUpperCase(ch2) == true)
+                        ch2 = Character.toLowerCase(ch2);
+                    if (ch2 == 'a')
+                    {
+                        for (int i = 0; i < c-1; i++)
+                        {
+                            for (int j = i+1; j < c; j++)
+                            {
+                                if (p[i] > p[j])
+                                {
+                                    String t = code[i];
+                                    code[i] = code[j];
+                                    code[j] = t;
+                                    String t2 = n[i];
+                                    n[i] = n[j];
+                                    n[j] = t2;
+                                    int tq = q[i];
+                                    q[i] = q[j];
+                                    q[j] = tq;
+                                    double tp = p[i];
+                                    p[i] = p[j];
+                                    p[j] = tp;
+                                }
+                            }
+                        }
+                    }
+                    else if (ch2 == 'd')
+                    {
+                        for (int i = 0; i < c-1; i++)
+                        {
+                            for (int j = i+1; j < c; j++)
+                            {
+                                if (p[i] < p[j])
+                                {
+                                    String t = code[i];
+                                    code[i] = code[j];
+                                    code[j] = t;
+                                    String t2 = n[i];
+                                    n[i] = n[j];
+                                    n[j] = t2;
+                                    int tq = q[i];
+                                    q[i] = q[j];
+                                    q[j] = tq;
+                                    double tp = p[i];
+                                    p[i] = p[j];
+                                    p[j] = tp;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                         System.out.println("Invalid input, rerouting to table");
+                         cmd();
+                    }
+                    Thread.sleep(2000);
+                    clearScreen();
+                    display();
+                    update();
+                }
+                break;
+            default:
+                System.out.println("Invalid input, rerouting to table");
+                cmd();
+        }
+    }
+    void findValue() throws IOException,InterruptedException
+    {
+        double S = 0.0d;
+        for (int i = 0; i < c; i++)
+        {
+            S+=(q[i]*p[i]);
+        }
+        System.out.println("Total value of the store = "+S);
+        Thread.sleep(14000);
+        clearScreen();
+        display();
+        update();
+    }
+}
