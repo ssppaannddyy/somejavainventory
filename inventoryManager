@@ -1,3 +1,4 @@
+//meant to be pasted in bluej
 import java.io.*;
 import java.util.*;
 public class inventoryManager
